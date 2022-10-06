@@ -1,0 +1,279 @@
+# This Python 3 environment comes with many helpful analytics libraries installed
+# For example, here's several helpful packages to load
+
+import numpy as np # linear algebra
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+import matplotlib.pyplot as plt #data visualization
+import seaborn as sns #for much better data visualization
+
+# Input data files are available in the read-only "../input/" directory
+# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory
+
+import os
+for dirname, _, filenames in os.walk('/kaggle/input'):
+    for filename in filenames:
+        print(os.path.join(dirname, filename))
+
+# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using "Save & Run All" 
+# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session
+/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/minuteCaloriesNarrow_merged.csv
+/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/weightLogInfo_merged.csv
+/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/sleepDay_merged.csv
+/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/dailyIntensities_merged.csv
+/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/minuteIntensitiesWide_merged.csv
+/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/minuteMETsNarrow_merged.csv
+/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/dailyCalories_merged.csv
+/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/hourlyCalories_merged.csv
+/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/heartrate_seconds_merged.csv
+/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/minuteSleep_merged.csv
+/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/hourlyIntensities_merged.csv
+/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/hourlySteps_merged.csv
+/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/minuteStepsNarrow_merged.csv
+/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/dailySteps_merged.csv
+/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/minuteStepsWide_merged.csv
+/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/minuteIntensitiesNarrow_merged.csv
+/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/minuteCaloriesWide_merged.csv
+/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/dailyActivity_merged.csv
+Ask Phase
+Problem Statement
+
+To understand how smart devices are used in today's smart device market
+However, the provided problem statement is too generic, so we shall make it more specific. Since Bellabeat manufactures health-focused smart products, the activity patterns of their users would be of interest to them. Therefore, the newly crafted problem statement is as follows:
+
+To understand the activity pattern of smart devices users in the market today.
+Below are questions that shall guide the analysis for Bellabeat:
+
+What are some trends in smart device usage?
+How could these trends apply to Bellabeat customers?
+How could these trends help influence Bellabeat marketing strategy?
+Prepare Phase
+The used for the analysis is provided by FitBit, made available through Mobius to the public. Since the data was not collected directly by Bellabeat, it shall be classified as External Data.
+
+*Note: Sample size of 30 is too small to properly to represent the entire user base of FitBit. Further analysis to be performed when access to additional smart device data is available*
+
+Let's proceed to import the dailyActivity Dataset to better understand the data that is being studied in the case study
+
+#Importing the dailyActivity Dataset
+dailyActivity_df = pd.read_csv("../input/fitbit/Fitabase Data 4.12.16-5.12.16/dailyActivity_merged.csv")
+dailyActivity_df
+Id	ActivityDate	TotalSteps	TotalDistance	TrackerDistance	LoggedActivitiesDistance	VeryActiveDistance	ModeratelyActiveDistance	LightActiveDistance	SedentaryActiveDistance	VeryActiveMinutes	FairlyActiveMinutes	LightlyActiveMinutes	SedentaryMinutes	Calories
+0	1503960366	4/12/2016	13162	8.500000	8.500000	0.0	1.88	0.55	6.06	0.00	25	13	328	728	1985
+1	1503960366	4/13/2016	10735	6.970000	6.970000	0.0	1.57	0.69	4.71	0.00	21	19	217	776	1797
+2	1503960366	4/14/2016	10460	6.740000	6.740000	0.0	2.44	0.40	3.91	0.00	30	11	181	1218	1776
+3	1503960366	4/15/2016	9762	6.280000	6.280000	0.0	2.14	1.26	2.83	0.00	29	34	209	726	1745
+4	1503960366	4/16/2016	12669	8.160000	8.160000	0.0	2.71	0.41	5.04	0.00	36	10	221	773	1863
+...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...
+935	8877689391	5/8/2016	10686	8.110000	8.110000	0.0	1.08	0.20	6.80	0.00	17	4	245	1174	2847
+936	8877689391	5/9/2016	20226	18.250000	18.250000	0.0	11.10	0.80	6.24	0.05	73	19	217	1131	3710
+937	8877689391	5/10/2016	10733	8.150000	8.150000	0.0	1.35	0.46	6.28	0.00	18	11	224	1187	2832
+938	8877689391	5/11/2016	21420	19.559999	19.559999	0.0	13.22	0.41	5.89	0.00	88	12	213	1127	3832
+939	8877689391	5/12/2016	8064	6.120000	6.120000	0.0	1.82	0.04	4.25	0.00	23	1	137	770	1849
+940 rows × 15 columns
+
+As seen from above dataframe, the data is stored in a long format.
+
+Let's also get some information on our dataset
+
+dailyActivity_df.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 940 entries, 0 to 939
+Data columns (total 15 columns):
+ #   Column                    Non-Null Count  Dtype  
+---  ------                    --------------  -----  
+ 0   Id                        940 non-null    int64  
+ 1   ActivityDate              940 non-null    object 
+ 2   TotalSteps                940 non-null    int64  
+ 3   TotalDistance             940 non-null    float64
+ 4   TrackerDistance           940 non-null    float64
+ 5   LoggedActivitiesDistance  940 non-null    float64
+ 6   VeryActiveDistance        940 non-null    float64
+ 7   ModeratelyActiveDistance  940 non-null    float64
+ 8   LightActiveDistance       940 non-null    float64
+ 9   SedentaryActiveDistance   940 non-null    float64
+ 10  VeryActiveMinutes         940 non-null    int64  
+ 11  FairlyActiveMinutes       940 non-null    int64  
+ 12  LightlyActiveMinutes      940 non-null    int64  
+ 13  SedentaryMinutes          940 non-null    int64  
+ 14  Calories                  940 non-null    int64  
+dtypes: float64(7), int64(7), object(1)
+memory usage: 110.3+ KB
+Based on the information generated, there are a total of 940 data points and all of which are Non-Null Values. However, noticed how the ActivityDate is defined as an object datatype. Let's change it to use Pandas Datetime Object
+
+dailyActivity_df['ActivityDate']=pd.to_datetime(dailyActivity_df['ActivityDate'])
+dailyActivity_df.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 940 entries, 0 to 939
+Data columns (total 15 columns):
+ #   Column                    Non-Null Count  Dtype         
+---  ------                    --------------  -----         
+ 0   Id                        940 non-null    int64         
+ 1   ActivityDate              940 non-null    datetime64[ns]
+ 2   TotalSteps                940 non-null    int64         
+ 3   TotalDistance             940 non-null    float64       
+ 4   TrackerDistance           940 non-null    float64       
+ 5   LoggedActivitiesDistance  940 non-null    float64       
+ 6   VeryActiveDistance        940 non-null    float64       
+ 7   ModeratelyActiveDistance  940 non-null    float64       
+ 8   LightActiveDistance       940 non-null    float64       
+ 9   SedentaryActiveDistance   940 non-null    float64       
+ 10  VeryActiveMinutes         940 non-null    int64         
+ 11  FairlyActiveMinutes       940 non-null    int64         
+ 12  LightlyActiveMinutes      940 non-null    int64         
+ 13  SedentaryMinutes          940 non-null    int64         
+ 14  Calories                  940 non-null    int64         
+dtypes: datetime64[ns](1), float64(7), int64(7)
+memory usage: 110.3 KB
+Before proceeding, let's evaluate the data based on the ROCCC criteria introduced during the Google Data Analytics Course:
+
+Reliability: Not reliable due to the small size of 30 being not sufficient to represent the overall population of FitBit Smart Devices users & we have no information on the demographic of the people who participated in the study (eg. Were the participant mainly women or was there a mixture of men & women? Age? etc)
+Original: The datasets are deemed original since we know which organization had prepared the data (FitBit)
+Comprehensive: Based on the initial screening of the dataset, it is quite comprehensive to the user's activity.
+Current: Dataset is not considered current since it was collected in 2016. Advancement in technology within the span of 5 years could have changed how FitBit users, by extension Smart Device Users, use their devices.
+Cited: No information was provided whether other organizations has cited the data prepared by FitBit.
+As there are no gender type specified in the dataset, we are unable to filter out data that is relevant to women (which is the audience of interest for Bellabeat). Since there are no null values present in the dataset, we are ready to move on to the Process Phase.
+
+Process Phase
+For the process phase, the tool selected for analysis would be Python. Was supposed to use R but that flagged a warning that all the content thus far would be erased thus the decision to proceed with Python was made. However, concepts from the Google Data Analytics Course shall be applied still.
+
+Programming approach was selected due to the size of the dataset and that writing out code can help to visualize the analysis logic / methodology in my opinion.
+
+To verify that the dataset is clean for analysis, a final check to see if there are any missing values present within the dataset as illustrated below in the code chunks.
+
+#Check for missing values with isNA()
+print(dailyActivity_df.isna().nunique())
+dailyActivity_df.isna()
+Id                          1
+ActivityDate                1
+TotalSteps                  1
+TotalDistance               1
+TrackerDistance             1
+LoggedActivitiesDistance    1
+VeryActiveDistance          1
+ModeratelyActiveDistance    1
+LightActiveDistance         1
+SedentaryActiveDistance     1
+VeryActiveMinutes           1
+FairlyActiveMinutes         1
+LightlyActiveMinutes        1
+SedentaryMinutes            1
+Calories                    1
+dtype: int64
+Id	ActivityDate	TotalSteps	TotalDistance	TrackerDistance	LoggedActivitiesDistance	VeryActiveDistance	ModeratelyActiveDistance	LightActiveDistance	SedentaryActiveDistance	VeryActiveMinutes	FairlyActiveMinutes	LightlyActiveMinutes	SedentaryMinutes	Calories
+0	False	False	False	False	False	False	False	False	False	False	False	False	False	False	False
+1	False	False	False	False	False	False	False	False	False	False	False	False	False	False	False
+2	False	False	False	False	False	False	False	False	False	False	False	False	False	False	False
+3	False	False	False	False	False	False	False	False	False	False	False	False	False	False	False
+4	False	False	False	False	False	False	False	False	False	False	False	False	False	False	False
+...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...
+935	False	False	False	False	False	False	False	False	False	False	False	False	False	False	False
+936	False	False	False	False	False	False	False	False	False	False	False	False	False	False	False
+937	False	False	False	False	False	False	False	False	False	False	False	False	False	False	False
+938	False	False	False	False	False	False	False	False	False	False	False	False	False	False	False
+939	False	False	False	False	False	False	False	False	False	False	False	False	False	False	False
+940 rows × 15 columns
+
+Based on the above check, each column is found to 1 unique value and from the dataframe it is clear that the unique value is False. Since isna() returned False for each data point, it confirms that there are no missing values within the dataset.
+
+With that check done, time to move on to the Analyze Phase.
+
+Analyze Phase
+In this phase,we shall perform so explolatory data analysis by generating some data visualization to better understand and draw insights to our data. This section will also effectively cover the "Share" Phase of the Google Data Analytics Framework since this entire notebook can be viewed as the document that will be shared with others.
+
+As the goal of this analysis is to understand & spot any trends in users'activities, let's first get a statistical description of the data using the describe() method provided by Pandas
+
+dailyActivity_df.describe()
+Id	TotalSteps	TotalDistance	TrackerDistance	LoggedActivitiesDistance	VeryActiveDistance	ModeratelyActiveDistance	LightActiveDistance	SedentaryActiveDistance	VeryActiveMinutes	FairlyActiveMinutes	LightlyActiveMinutes	SedentaryMinutes	Calories
+count	9.400000e+02	940.000000	940.000000	940.000000	940.000000	940.000000	940.000000	940.000000	940.000000	940.000000	940.000000	940.000000	940.000000	940.000000
+mean	4.855407e+09	7637.910638	5.489702	5.475351	0.108171	1.502681	0.567543	3.340819	0.001606	21.164894	13.564894	192.812766	991.210638	2303.609574
+std	2.424805e+09	5087.150742	3.924606	3.907276	0.619897	2.658941	0.883580	2.040655	0.007346	32.844803	19.987404	109.174700	301.267437	718.166862
+min	1.503960e+09	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000
+25%	2.320127e+09	3789.750000	2.620000	2.620000	0.000000	0.000000	0.000000	1.945000	0.000000	0.000000	0.000000	127.000000	729.750000	1828.500000
+50%	4.445115e+09	7405.500000	5.245000	5.245000	0.000000	0.210000	0.240000	3.365000	0.000000	4.000000	6.000000	199.000000	1057.500000	2134.000000
+75%	6.962181e+09	10727.000000	7.712500	7.710000	0.000000	2.052500	0.800000	4.782500	0.000000	32.000000	19.000000	264.000000	1229.500000	2793.250000
+max	8.877689e+09	36019.000000	28.030001	28.030001	4.942142	21.920000	6.480000	10.710000	0.110000	210.000000	143.000000	518.000000	1440.000000	4900.000000
+Based on the description provided, it can be seen that both Total Distance & Tracker Distance are actually duplicate measurements due to their statistical information being almost the same.
+
+Looking at the timing data recorded (VeryActiveMinutes, FairlyActiveMinutes etc), it is hard to make sense of all these values. To better understand how active the users are, its best to compare the minutes the user spend being active against the total time the FitBit is worn by the users. We will have to perform some calculation using the data frame in order to achieve that goal.
+
+#Creating a column within the Dataframe to record Active Time, Total Time & Proportion Of Time Being Active (%)
+dailyActivity_df['ActiveTime']=dailyActivity_df['VeryActiveMinutes']+dailyActivity_df['FairlyActiveMinutes']+dailyActivity_df['LightlyActiveMinutes']
+dailyActivity_df['TotalTime']=dailyActivity_df['VeryActiveMinutes']+dailyActivity_df['FairlyActiveMinutes']+dailyActivity_df['LightlyActiveMinutes']+dailyActivity_df['SedentaryMinutes']
+dailyActivity_df['ProportionOfTimeActive%'] = dailyActivity_df['ActiveTime'] / dailyActivity_df['TotalTime'] * 100
+dailyActivity_df.head()
+Id	ActivityDate	TotalSteps	TotalDistance	TrackerDistance	LoggedActivitiesDistance	VeryActiveDistance	ModeratelyActiveDistance	LightActiveDistance	SedentaryActiveDistance	VeryActiveMinutes	FairlyActiveMinutes	LightlyActiveMinutes	SedentaryMinutes	Calories	ActiveTime	TotalTime	ProportionOfTimeActive%
+0	1503960366	2016-04-12	13162	8.50	8.50	0.0	1.88	0.55	6.06	0.0	25	13	328	728	1985	366	1094	33.455210
+1	1503960366	2016-04-13	10735	6.97	6.97	0.0	1.57	0.69	4.71	0.0	21	19	217	776	1797	257	1033	24.878993
+2	1503960366	2016-04-14	10460	6.74	6.74	0.0	2.44	0.40	3.91	0.0	30	11	181	1218	1776	222	1440	15.416667
+3	1503960366	2016-04-15	9762	6.28	6.28	0.0	2.14	1.26	2.83	0.0	29	34	209	726	1745	272	998	27.254509
+4	1503960366	2016-04-16	12669	8.16	8.16	0.0	2.71	0.41	5.04	0.0	36	10	221	773	1863	267	1040	25.673077
+Let's have a look at the statistical data of the Proportion Of Time Active % as well as visualize its distribution as well
+
+#Statistical Data for ProportionOfTimeActive%
+dailyActivity_df.describe()
+Id	TotalSteps	TotalDistance	TrackerDistance	LoggedActivitiesDistance	VeryActiveDistance	ModeratelyActiveDistance	LightActiveDistance	SedentaryActiveDistance	VeryActiveMinutes	FairlyActiveMinutes	LightlyActiveMinutes	SedentaryMinutes	Calories	ActiveTime	TotalTime	ProportionOfTimeActive%
+count	9.400000e+02	940.000000	940.000000	940.000000	940.000000	940.000000	940.000000	940.000000	940.000000	940.000000	940.000000	940.000000	940.000000	940.000000	940.000000	940.000000	940.000000
+mean	4.855407e+09	7637.910638	5.489702	5.475351	0.108171	1.502681	0.567543	3.340819	0.001606	21.164894	13.564894	192.812766	991.210638	2303.609574	227.542553	1218.753191	20.016289
+std	2.424805e+09	5087.150742	3.924606	3.907276	0.619897	2.658941	0.883580	2.040655	0.007346	32.844803	19.987404	109.174700	301.267437	718.166862	121.776307	265.931767	11.783593
+min	1.503960e+09	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	0.000000	2.000000	0.000000
+25%	2.320127e+09	3789.750000	2.620000	2.620000	0.000000	0.000000	0.000000	1.945000	0.000000	0.000000	0.000000	127.000000	729.750000	1828.500000	146.750000	989.750000	12.396380
+50%	4.445115e+09	7405.500000	5.245000	5.245000	0.000000	0.210000	0.240000	3.365000	0.000000	4.000000	6.000000	199.000000	1057.500000	2134.000000	247.000000	1440.000000	21.414165
+75%	6.962181e+09	10727.000000	7.712500	7.710000	0.000000	2.052500	0.800000	4.782500	0.000000	32.000000	19.000000	264.000000	1229.500000	2793.250000	317.250000	1440.000000	26.950973
+max	8.877689e+09	36019.000000	28.030001	28.030001	4.942142	21.920000	6.480000	10.710000	0.110000	210.000000	143.000000	518.000000	1440.000000	4900.000000	552.000000	1440.000000	100.000000
+#Visualizing the Statistical Distribution using Seaborn
+sns.set_theme()
+fig_dims = (10, 8)
+fig, ax = plt.subplots(figsize=fig_dims)
+sns.kdeplot(data=dailyActivity_df['ProportionOfTimeActive%'])
+<AxesSubplot:xlabel='ProportionOfTimeActive%', ylabel='Density'>
+
+Conclusion: As seen from the distribution plot, on average, users spend approximately 20% of the time being active while wearing their FitBit. Based on the statistical data, the average total time which user wear their FitBit is 1219 mins and the average time a user spend being active while wearing their FitBit is 228 mins.
+
+Relationship Between Active Time, Total Distance & Calories
+
+It is a common believe that the more active a person is, the more calories they burn.Additionally, we would also like to see how Total Distance relates to Active Time and Calories as well.
+
+The hypothesis is that:
+
+The greater the Total Distance recorded, the greater the Active Time of the User
+The greater the Active Time, the more Calories a User will consume
+Therefore, Total Distance, Active and Calories is hypothesize to have a positive correlation with each other
+Let us see if that's what the data shows us.
+
+#Extract the columns of interest into a separate dataframe
+selectedColumn = [dailyActivity_df['TotalDistance'], dailyActivity_df['ActiveTime'], dailyActivity_df['Calories']]
+fitness_df = pd.DataFrame(selectedColumn).T
+fitness_df
+TotalDistance	ActiveTime	Calories
+0	8.500000	366.0	1985.0
+1	6.970000	257.0	1797.0
+2	6.740000	222.0	1776.0
+3	6.280000	272.0	1745.0
+4	8.160000	267.0	1863.0
+...	...	...	...
+935	8.110000	266.0	2847.0
+936	18.250000	309.0	3710.0
+937	8.150000	253.0	2832.0
+938	19.559999	313.0	3832.0
+939	6.120000	161.0	1849.0
+940 rows × 3 columns
+
+#Plotting the Total Distance against Active Time
+fig_dims = (10, 8)
+fig, ax = plt.subplots(figsize=fig_dims)
+sns.scatterplot(x=fitness_df['ActiveTime'], y=fitness_df['TotalDistance'], hue=fitness_df['Calories'], size=fitness_df['Calories'], sizes=(10,150)).set_title('Total Distance against Active Time')
+Text(0.5, 1.0, 'Total Distance against Active Time')
+
+#Plotting the Total Distance against Active Time
+fig_dims = (10, 8)
+fig, ax = plt.subplots(figsize=fig_dims)
+sns.scatterplot(x=fitness_df['ActiveTime'], y=fitness_df['Calories'], hue=fitness_df['TotalDistance'], size=fitness_df['TotalDistance'], sizes=(10,150)).set_title('Calories against Active Time')
+Text(0.5, 1.0, 'Calories against Active Time')
+
+#Generating a Correlation Matrix Plot
+heatmap = sns.heatmap(fitness_df.corr(), vmin=-1, vmax=1, annot=True)
+heatmap.set_title('Correlation Heatmap', fontdict={'fontsize':12}, pad=12)
+Text(0.5, 1.0, 'Correlation Heatmap')
+
+Conclusion:
+
+Based on the 2 plots above, it can be seen that there is a positive correlation between Total Distance, Active Time & Calories. This is further validated by the generated Correlation Plot between the 3 variables. However, the values of the Correlation Plot suggest that there is a relatively strong correlation between Total Distance-Active Time & Total Distance-Calories. The positive correlation between Active Time & Calories is weak base on this dataset & thus more research has to be done
