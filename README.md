@@ -1,1 +1,1 @@
-# Google-Capstone-Data-Science-CASE-STUDY-1
+# Google-Capstone-Data-Science
